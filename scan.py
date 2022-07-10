@@ -54,25 +54,25 @@ print(HASH)
 # 2. Perform a hash lookup against metadefender.opswat.com and see if there are
 # previously cached results for the file
 
-url = "https://api.metadefender.com/v4/apikey/"
+apikey_url = "https://api.metadefender.com/v4/apikey/"
 headers = {
   "apikey": API_KEY
 }
 
-response = requests.request("GET", url, headers=headers)
-print(response.text)
+key_response = requests.request("GET", apikey_url, headers=headers)
+print(key_response.text)
 
-url = "https://api.metadefender.com/v4/hash/" + HASH
+hash_url = "https://api.metadefender.com/v4/hash/" + HASH
 headers = {
   "apikey": API_KEY
 }
 
-response = requests.request("GET", url, headers=headers)
-print(response.text)
+hash_response = requests.request("GET", hash_url, headers=headers)
+print(hash_response.text)
 
 
 # 3. If results are found, skip to step 6
-if (response):
+if (hash_response):
   print("found")
 
 
@@ -80,7 +80,7 @@ if (response):
 else:
   print("not found")
 
-  url = "https://api.metadefender.com/v4/file"
+  file_url = "https://api.metadefender.com/v4/file"
   headers = {
     "apikey": API_KEY,
     "Content-Type": "application/octet-stream",
@@ -88,28 +88,35 @@ else:
   }
   payload = "\"@/path/to/sample1.txt\""
 
-  response = requests.request("POST", url, headers=headers, data=payload)
+  response = requests.request("POST", file_url, headers=headers, data=payload)
   res_json = response.json()
-  # print(response.json())
+  print(res_json)
   data_id = res_json.get('data_id')
-  print(data_id)
+  # print(data_id)
+  # print(res_json.get('progress_percentage'))
     # DATA_ID = "bzIyMDcxMGhvMklBaWZvdkVHVHgzU3M5ZWk"
 
 
 
 
-    # # 5. Repeatedly pull on the "data_id" to retrieve results
-  url = "https://api.metadefender.com/v4/file/" + data_id
-  headers = {
-    "apikey": API_KEY,
-    # "x-file-metadata": "{x-file-metadata}"
-  }
+   # # 5. Repeatedly pull on the "data_id" to retrieve results
+    
+  while True:
+    data_url = "https://api.metadefender.com/v4/file/" + data_id
+    headers = {
+      "apikey": API_KEY,
+      # "x-file-metadata": "{x-file-metadata}"
+    }
 
-  response = requests.request("GET", url, headers=headers)
-
-  print(response.text)
-    # print(response.text["data_id"])
-
+    response = requests.request("GET", data_url, headers=headers)
+    res_json = response.json()
+    # print(res_json)
+    
+    percentage = (res_json.get(('scan_results')))['progress_percentage']
+    print(percentage)
+    
+    if percentage == 100:
+      break
 
 
 
