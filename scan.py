@@ -27,18 +27,46 @@
 
 import hashlib
 
+import requests
+
 API_KEY = "1f4000446f26470daf160a2b269da23b"
 
 # print(hashlib.algorithms_guaranteed)
 
 file = "sample1.txt" # Location of the file (can be set a different way)
-BLOCK_SIZE = 65536 # The size of each read from the file
+# BLOCK_SIZE = 65536 # The size of each read from the file
 
-file_hash = hashlib.sha256() # Create the hash object, can use something other than `.sha256()` if you wish
-with open(file, 'rb') as f: # Open the file to read it's bytes
-    fb = f.read(BLOCK_SIZE) # Read from the file. Take in the amount declared above
-    while len(fb) > 0: # While there is still data being read from the file
-        file_hash.update(fb) # Update the hash
-        fb = f.read(BLOCK_SIZE) # Read the next block from the file
+# file_hash = hashlib.sha256() # Create the hash object, can use something other than `.sha256()` if you wish
+# with open(file, 'rb') as f: # Open the file to read it's bytes
+#     fb = f.read(BLOCK_SIZE) # Read from the file. Take in the amount declared above
+#     while len(fb) > 0: # While there is still data being read from the file
+#         file_hash.update(fb) # Update the hash
+#         fb = f.read(BLOCK_SIZE) # Read the next block from the file
 
-print (file_hash.hexdigest()) # Get the hexadecimal digest of the hash
+# print (file_hash.hexdigest()) # Get the hexadecimal digest of the hash
+
+
+# 2. Perform a hash lookup against metadefender.opswat.com and see if there are 
+# previously cached results for the file 
+
+url = "https://api.metadefender.com/v4/apikey/"
+headers = {
+ "apikey": API_KEY
+}
+
+response = requests.request("GET", url, headers=headers)
+print(response.text)
+
+
+url = "https://api.metadefender.com/v4/file"
+headers = {
+ "apikey": API_KEY,
+ "Content-Type": "application/octet-stream",
+ "filename": "sample1.txt"
+}
+payload = "\"@/path/to/sample1.txt\""
+
+response = requests.request("POST", url, headers=headers, data=payload)
+print(response.text)
+
+DATA_ID = "bzIyMDcxMGhvMklBaWZvdkVHVHgzU3M5ZWk"
